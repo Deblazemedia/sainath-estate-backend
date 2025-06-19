@@ -36,17 +36,36 @@ router.post('/newsletter', async (req, res) => {
             to: email,
             subject: "Thank You for Subscribing to Sainath Estate",
             html: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
-                    <h2 style="color: #333;">Thank You for Connecting with Sainath Estate</h2>
-                    <p>We appreciate your interest in Sainath Estate, Mumbai's trusted real estate firm since 1991.</p>
-                    <p>From property buying and selling to leasing, resale, and investment consultation — we offer complete real estate solutions tailored to your needs.</p>
-                    <p>📍 <strong>Office:</strong> Shop No. 2, Evershine Embassy CHS Ltd, Veera Desai Road, Andheri West, Mumbai - 400053<br>
-                    📞 <strong>Phone:</strong> +91 98205 64265 / +91 99200 40440<br>
-                    ✉️ <strong>Email:</strong> bunty@sainathestate.com<br>
-                    🌐 <strong>Website:</strong> <a href="https://www.sainathestate.com" target="_blank">www.sainathestate.com</a></p>
-                    <p style="margin-top: 20px;">We look forward to helping you find your perfect property.</p>
-                    <p style="color: #888;">- Team Sainath Estate</p>
-                </div>
+                <div style="font-family: 'Segoe UI', Roboto, Arial, sans-serif; max-width: 600px; margin: auto; background-color: #f9f9f9; padding: 30px; border-radius: 1px; box-shadow: 0 0 10px rgba(0,0,0,0.05); color: #333;">
+    <h2 style="color: #1e1e1e; font-size: 24px; border-bottom: 2px solid #d1d1d1; padding-bottom: 10px;">Thank You for Connecting with Sainath Estate</h2>
+
+    <p style="font-size: 16px; line-height: 1.6;">We truly appreciate your interest in Sainath Estate — Mumbai’s trusted name in real estate since 1991.</p>
+
+    <p style="font-size: 16px; line-height: 1.6;">Whether you're buying, selling, renting, or investing — we provide comprehensive real estate services that prioritize your goals and peace of mind.</p>
+
+    <div style="margin-top: 20px; font-size: 15px; line-height: 1.6;">
+        📍 <strong>Office:</strong> Shop No. 2, Evershine Embassy CHS Ltd, Veera Desai Road, Andheri West, Mumbai - 400053<br>
+        📞 <strong>Phone:</strong> +91 98205 64265 / +91 99200 40440<br>
+        ✉️ <strong>Email:</strong> <a href="mailto:bunty@sainathestate.com" style="color: #0066cc;">bunty@sainathestate.com</a><br>
+        🌐 <strong>Website:</strong> <a href="https://www.sainathestate.com" target="_blank" style="color: #0066cc;">www.sainathestate.com</a>
+    </div>
+
+    <div style="margin-top: 30px;">
+        <p style="font-size: 16px;">Follow us for updates, listings & property insights:</p>
+        <a href="https://www.instagram.com/sainathestate/" target="_blank" style="text-decoration: none; margin-right: 10px;">
+            <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" width="24" style="vertical-align: middle;" alt="Instagram">
+            <span style="margin-left: 5px; color: #E1306C;">Instagram</span>
+        </a>
+        <a href="https://www.facebook.com/sainathestates" target="_blank" style="text-decoration: none; margin-left: 20px;">
+            <img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" width="24" style="vertical-align: middle;" alt="Facebook">
+            <span style="margin-left: 5px; color: #3b5998;">Facebook</span>
+        </a>
+    </div>
+
+    <p style="margin-top: 30px; color: #777;">We look forward to helping you find your perfect property.<br>
+    <strong>- Team Sainath Estate</strong></p>
+</div>
+
             `
         });
 
