@@ -1,40 +1,49 @@
 const express = require('express');
 const router = express.Router();
-const { google } = require('googleapis');
-const Newsletter = require('../models/Newsletter'); // Mongoose model
+const nodemailer = require('nodemailer');
+const Newsletter = require('../models/Newsletter');
+const verifyToken = require('../middleware/authMiddleware'); // ✅ Import middleware
 
-// Google Sheets Setup
-const auth = new google.auth.GoogleAuth({
-    keyFile: 'google-credentials.json', // 🔐 Your service account JSON file
-    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+// Configure nodemailer
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'blazemedia29@gmail.com',
+        pass: 'lzzf nzsr daaf joma'
+    }
 });
-const sheetId = '1u1K6u1L2fQjO5Z82S-xRWr9iy3x8p-Td6O0LpQzi8-4';
 
+// POST /api/newsletter - Public route to subscribe
 router.post('/newsletter', async (req, res) => {
     const { email } = req.body;
     if (!email) return res.status(400).json({ error: "Email is required" });
 
     try {
-        // 1. Save to MongoDB
         const existing = await Newsletter.findOne({ email });
         if (!existing) await new Newsletter({ email }).save();
 
-        // 2. Save to Google Sheet
-        const client = await auth.getClient();
-        const sheets = google.sheets({ version: 'v4', auth: client });
-        await sheets.spreadsheets.values.append({
-            spreadsheetId: sheetId,
-            range: 'Sheet1!A1',
-            valueInputOption: 'USER_ENTERED',
-            requestBody: {
-                values: [[email, new Date().toLocaleString()]]
-            }
+        await transporter.sendMail({
+            from: '"Newsletter Signup" <blazemedia29@gmail.com>',
+            to: 'blazemedia29@gmail.com',
+            subject: 'New Newsletter Subscription',
+            text: `New subscriber email: ${email}`
         });
 
         res.status(201).json({ message: "Subscribed successfully" });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Subscription failed" });
+    }
+});
+
+// ✅ GET /api/newsletter - Admin-only access
+router.get('/newsletter', verifyToken, async (req, res) => {
+    try {
+        const emails = await Newsletter.find({}, { email: 1, _id: 0 }).sort({ createdAt: -1 });
+        res.status(200).json(emails);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Failed to fetch emails" });
     }
 });
 
