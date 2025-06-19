@@ -19,19 +19,18 @@ const submitContact = async (req, res) => {
 
         const saved = await newMessage.save();
 
-        // Email Transporter Setup (Use Gmail or SMTP)
+        // Email Transporter Setup
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
                 user: 'blazemedia29@gmail.com',
-                pass: 'lzzf nzsr daaf joma'  // Use App Password, not your Gmail password
+                pass: 'lzzf nzsr daaf joma'
             }
         });
 
-        
-        // Email format
-        const mailOptions = {
-            from: `"Website Contact" <your-email@gmail.com>`,
+        // Admin notification
+        await transporter.sendMail({
+            from: `"Website Contact" <blazemedia29@gmail.com>`,
             to: 'blazemedia29@gmail.com',
             subject: 'New Contact Inquiry from Website',
             html: `
@@ -42,17 +41,36 @@ const submitContact = async (req, res) => {
                 <p><strong>Message:</strong> ${message}</p>
                 ${propertyTitle ? `<p><strong>Property:</strong> ${propertyTitle}</p>` : ''}
             `
-        };
+        });
 
-        await transporter.sendMail(mailOptions);
+        // Auto-reply to user
+        await transporter.sendMail({
+            from: '"Sainath Estate" <blazemedia29@gmail.com>',
+            to: email,
+            subject: "Thank You for Contacting Sainath Estate",
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
+                    <h2 style="color: #333;">Thank You, ${name}</h2>
+                    <p>We’ve received your message and our team at <strong>Sainath Estate</strong> will get back to you shortly.</p>
+                    <p>Established in 1991, Sainath Estate is Mumbai’s trusted partner for residential and commercial real estate. Whether you’re buying, renting, investing, or selling — we’re here to assist every step of the way.</p>
+                    <p>📍 <strong>Office:</strong> Shop No. 2, Evershine Embassy CHS Ltd, Veera Desai Road, Andheri West, Mumbai - 400053<br>
+                    📞 <strong>Phone:</strong> +91 98205 64265 / +91 99200 40440<br>
+                    ✉️ <strong>Email:</strong> bunty@sainathestate.com<br>
+                    🌐 <strong>Website:</strong> <a href="https://www.sainathestate.com" target="_blank">www.sainathestate.com</a></p>
+                    <p style="margin-top: 20px;">We appreciate your trust and look forward to helping you soon.</p>
+                    <p style="color: #888;">- Team Sainath Estate</p>
+                </div>
+            `
+        });
 
-        res.status(201).json({ message: 'Message submitted and emailed successfully', data: saved });
+        res.status(201).json({ message: 'Message submitted and emails sent successfully', data: saved });
 
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to submit or send message' });
     }
 };
+
 
 
 // Get all (admin only) + filtering + pagination
