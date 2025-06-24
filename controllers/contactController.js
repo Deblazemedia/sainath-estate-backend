@@ -1,12 +1,21 @@
-const nodemailer = require('nodemailer');
-const Contact = require('../models/Contact'); // your Mongoose model
+require('dotenv').config(); // Ensure this is called once in your app
+
+const twilio = require('twilio');
+const Contact = require('../models/Contact');
+
+// Twilio config from environment
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+const whatsappFrom = process.env.TWILIO_WHATSAPP_FROM;
+const whatsappTo = process.env.TWILIO_WHATSAPP_TO;
+
+const client = twilio(accountSid, authToken);
 
 // Submit contact (public)
 const submitContact = async (req, res) => {
     try {
         const { name, email, phone, message, propertyId, propertyTitle } = req.body;
 
-        // Save to database
         const newMessage = new Contact({
             name,
             email,
@@ -19,38 +28,26 @@ const submitContact = async (req, res) => {
 
         const saved = await newMessage.save();
 
-        // Email Transporter Setup (Use Gmail or SMTP)
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: 'blazemedia29@gmail.com',
-                pass: 'lzzf nzsr daaf joma'  // Use App Password, not your Gmail password
-            }
+        // Compose WhatsApp message
+        const text = `
+📩 *New Inquiry from Website*
+*Name:* ${name}
+*Email:* ${email}
+*Phone:* ${phone}
+*Message:* ${message}
+        `;
+
+        // Send WhatsApp message via Twilio
+        await client.messages.create({
+            body: text,
+            from: whatsappFrom,
+            to: whatsappTo
         });
 
-        
-        // Email format
-        const mailOptions = {
-            from: `"Website Contact" <your-email@gmail.com>`,
-            to: 'blazemedia29@gmail.com',
-            subject: 'New Contact Inquiry from Website',
-            html: `
-                <h2>New Message Received</h2>
-                <p><strong>Name:</strong> ${name}</p>
-                <p><strong>Email:</strong> ${email}</p>
-                <p><strong>Phone:</strong> ${phone}</p>
-                <p><strong>Message:</strong> ${message}</p>
-                ${propertyTitle ? `<p><strong>Property:</strong> ${propertyTitle}</p>` : ''}
-            `
-        };
-
-        await transporter.sendMail(mailOptions);
-
-        res.status(201).json({ message: 'Message submitted and emailed successfully', data: saved });
-
+        res.status(201).json({ message: 'Submitted and WhatsApped successfully', data: saved });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Failed to submit or send message' });
+        res.status(500).json({ error: 'Failed to submit or send WhatsApp message' });
     }
 };
 

@@ -4,6 +4,7 @@ const cors = require('cors');
 const path = require('path');
 const connectDB = require('./config/db');
 const emailRoutes = require('./routes/EmailRoute'); // ✅ path to your router fi
+const popupFormRoutes = require('./routes/popupFormRoutes');
 
 dotenv.config();
 connectDB();
@@ -45,6 +46,7 @@ app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/creatives', require('./routes/creativeImageRoutes'));
 app.use('/api/contact', require('./routes/contactRoutes'));
 app.use('/api', emailRoutes); // ✅ Prefixing with `/api`
+app.use('/api', popupFormRoutes);
 
 // ✅ Start server
 const PORT = process.env.PORT || 5000;

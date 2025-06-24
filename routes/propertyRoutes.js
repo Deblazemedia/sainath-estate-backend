@@ -2,13 +2,15 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
+
 const {
     addProperty,
     updateProperty,
     getAllProperties,
     getPropertyById,
     getRecentProperties,
-    deleteProperty
+    deleteProperty,
+    viewAllProperties // ✅ Imported new controller
 } = require('../controllers/propertyController');
 
 const verifyToken = require('../middleware/authMiddleware');
@@ -53,6 +55,7 @@ router.delete('/:id', verifyToken, deleteProperty);
 
 // ========== Public Routes ==========
 router.get('/', getAllProperties);
+router.get('/view-all', viewAllProperties); // ✅ New route to fetch ALL properties
 router.get('/recent', getRecentProperties);
 router.get('/:id', getPropertyById);
 

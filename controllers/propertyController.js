@@ -1,6 +1,18 @@
 const Property = require('../models/Property');
 const path = require('path');
 
+// 💡 Price formatting utility
+const formatPrice = (price) => {
+    if (!price || isNaN(price)) return "";
+    if (price >= 10000000) {
+        return `₹${(price / 10000000).toFixed(2)} Cr`;
+    } else if (price >= 100000) {
+        return `₹${(price / 100000).toFixed(2)} Lakh`;
+    } else {
+        return `₹${price}`;
+    }
+};
+
 // Add new property with uploaded images
 const addProperty = async (req, res) => {
     try {
@@ -23,7 +35,10 @@ const addProperty = async (req, res) => {
         const property = new Property(propertyData);
         const saved = await property.save();
 
-        res.status(201).json(saved);
+        res.status(201).json({
+            ...saved._doc,
+            formattedPrice: formatPrice(saved.price)
+        });
     } catch (err) {
         console.error("Add Property Error:", err);
         res.status(500).json({ error: "Failed to add property" });
@@ -59,9 +74,28 @@ const updateProperty = async (req, res) => {
 
         if (!updated) return res.status(404).json({ error: "Property not found" });
 
-        res.status(200).json(updated);
+        res.status(200).json({
+            ...updated._doc,
+            formattedPrice: formatPrice(updated.price)
+        });
     } catch (err) {
         res.status(500).json({ error: "Failed to update property" });
+    }
+};
+
+// View all properties (no filter, no pagination)
+const viewAllProperties = async (req, res) => {
+    try {
+        const allProperties = await Property.find().sort({ createdAt: -1 });
+
+        const formatted = allProperties.map(p => ({
+            ...p._doc,
+            formattedPrice: formatPrice(p.price)
+        }));
+
+        res.status(200).json(formatted);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to fetch all properties" });
     }
 };
 
@@ -104,11 +138,16 @@ const getAllProperties = async (req, res) => {
             .skip(skip)
             .limit(Number(limit));
 
+        const formatted = properties.map(p => ({
+            ...p._doc,
+            formattedPrice: formatPrice(p.price)
+        }));
+
         res.status(200).json({
             total,
             currentPage: Number(page),
             totalPages: Math.ceil(total / limit),
-            properties
+            properties: formatted
         });
     } catch (err) {
         res.status(500).json({ error: "Failed to fetch properties" });
@@ -120,7 +159,11 @@ const getPropertyById = async (req, res) => {
     try {
         const property = await Property.findById(req.params.id);
         if (!property) return res.status(404).json({ error: "Property not found" });
-        res.status(200).json(property);
+
+        res.status(200).json({
+            ...property._doc,
+            formattedPrice: formatPrice(property.price)
+        });
     } catch (err) {
         res.status(500).json({ error: "Failed to fetch property" });
     }
@@ -136,7 +179,12 @@ const getRecentProperties = async (req, res) => {
             .sort({ createdAt: -1 })
             .limit(5);
 
-        res.status(200).json(recent);
+        const formatted = recent.map(p => ({
+            ...p._doc,
+            formattedPrice: formatPrice(p.price)
+        }));
+
+        res.status(200).json(formatted);
     } catch (err) {
         res.status(500).json({ error: "Failed to fetch recent properties" });
     }
@@ -159,5 +207,6 @@ module.exports = {
     getAllProperties,
     getPropertyById,
     getRecentProperties,
-    deleteProperty
+    deleteProperty,
+    viewAllProperties
 };
