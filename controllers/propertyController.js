@@ -204,9 +204,16 @@ const getRecentProperties = async (req, res) => {
         const oneWeekAgo = new Date();
         oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-        const recent = await Property.find({ createdAt: { $gte: oneWeekAgo } })
+        let recent = await Property.find({ createdAt: { $gte: oneWeekAgo } })
             .sort({ createdAt: -1 })
             .limit(5);
+
+        // fallback if empty
+        if (recent.length === 0) {
+            recent = await Property.find()
+                .sort({ createdAt: -1 })
+                .limit(5);
+        }
 
         const formatted = recent.map(p => ({
             ...p._doc,
@@ -218,6 +225,7 @@ const getRecentProperties = async (req, res) => {
         res.status(500).json({ error: "Failed to fetch recent properties" });
     }
 };
+
 
 // Delete property by ID
 const deleteProperty = async (req, res) => {
