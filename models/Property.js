@@ -7,7 +7,7 @@ const propertySchema = new mongoose.Schema({
     price: Number,
     location: String,
     type: String, // e.g., 1BHK, Plot
-    status: { type: String, default: "available" },
+    status: { type: String, enum: ['available', 'sold', 'pending'], default: 'available' },
     listingType: { type: String, enum: ['buy', 'rent'], required: true }, // 👈 New
     category: { type: String, enum: ['luxury', 'commercial'], required: true }, // 👈 New
     amenities: [String],
@@ -15,7 +15,9 @@ const propertySchema = new mongoose.Schema({
     slider_image: String, // 👈 Add this line in schema
     videos: [String],
     floorPlans: [String],
-    createdAt: { type: Date, default: Date.now }
+    createdAt: { type: Date, default: Date.now },
+    status: { type: String, default: "draft" } // Default is now 'draft'
+
 });
 
 module.exports = mongoose.model('Property', propertySchema);

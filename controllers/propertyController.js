@@ -22,15 +22,28 @@ const addProperty = async (req, res) => {
         const galleryImages = files?.gallery?.map(file => file.filename) || [];
         const bannerImages = files?.propertyBanner?.map(file => file.filename) || [];
 
+        // enum checks
+        const validStatuses = ['available', 'sold', 'pending'];
+        const validListingTypes = ['buy', 'rent'];
+        const validCategories = ['luxury', 'commercial'];
+
         const propertyData = {
             ...body,
             slider_image: sliderImage,
             gallery: galleryImages,
-            propertyBanner: bannerImages
+            propertyBanner: bannerImages,
+            status: validStatuses.includes(body.status) ? body.status : 'available',
+            listingType: validListingTypes.includes(body.listingType) ? body.listingType : null,
+            category: validCategories.includes(body.category) ? body.category : null
         };
 
-        // Convert price to number
-        if (propertyData.price) propertyData.price = Number(propertyData.price);
+        if (!propertyData.listingType || !propertyData.category) {
+            return res.status(400).json({ error: "Invalid listingType or category" });
+        }
+
+        if (propertyData.price) {
+            propertyData.price = Number(propertyData.price);
+        }
 
         const property = new Property(propertyData);
         const saved = await property.save();
@@ -45,12 +58,26 @@ const addProperty = async (req, res) => {
     }
 };
 
+
 // Update existing property with image update
 const updateProperty = async (req, res) => {
     try {
         const { body, files } = req;
 
-        let updateData = { ...body };
+        const validStatuses = ['available', 'sold', 'pending'];
+        const validListingTypes = ['buy', 'rent'];
+        const validCategories = ['luxury', 'commercial'];
+
+        let updateData = {
+            ...body,
+            status: validStatuses.includes(body.status) ? body.status : 'available',
+            listingType: validListingTypes.includes(body.listingType) ? body.listingType : null,
+            category: validCategories.includes(body.category) ? body.category : null
+        };
+
+        if (!updateData.listingType || !updateData.category) {
+            return res.status(400).json({ error: "Invalid listingType or category" });
+        }
 
         if (files?.slider_image?.[0]) {
             updateData.slider_image = files.slider_image[0].filename;
@@ -79,9 +106,11 @@ const updateProperty = async (req, res) => {
             formattedPrice: formatPrice(updated.price)
         });
     } catch (err) {
+        console.error("Update Property Error:", err);
         res.status(500).json({ error: "Failed to update property" });
     }
 };
+
 
 // View all properties (no filter, no pagination)
 const viewAllProperties = async (req, res) => {
