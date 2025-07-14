@@ -13,7 +13,7 @@ const propertySchema = new mongoose.Schema({
     amenities: [String],
     gallery: [String],
     slider_image: String, // 👈 Add this line in schema
-    videos: [String],
+    reraNumber: String,
     floorPlans: [String],
     createdAt: { type: Date, default: Date.now },
     status: { type: String, default: "draft" } // Default is now 'draft'

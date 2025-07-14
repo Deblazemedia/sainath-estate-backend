@@ -34,7 +34,9 @@ const addProperty = async (req, res) => {
             propertyBanner: bannerImages,
             status: validStatuses.includes(body.status) ? body.status : 'available',
             listingType: validListingTypes.includes(body.listingType) ? body.listingType : null,
-            category: validCategories.includes(body.category) ? body.category : null
+            category: validCategories.includes(body.category) ? body.category : null,
+            amenities: body.amenities ? body.amenities.split(',').map(a => a.trim()) : [],
+            reraNumber: body.reraNumber || ''
         };
 
         if (!propertyData.listingType || !propertyData.category) {
@@ -72,7 +74,9 @@ const updateProperty = async (req, res) => {
             ...body,
             status: validStatuses.includes(body.status) ? body.status : 'available',
             listingType: validListingTypes.includes(body.listingType) ? body.listingType : null,
-            category: validCategories.includes(body.category) ? body.category : null
+            category: validCategories.includes(body.category) ? body.category : null,
+            amenities: body.amenities ? body.amenities.split(',').map(a => a.trim()) : [],
+            reraNumber: body.reraNumber || ''
         };
 
         if (!updateData.listingType || !updateData.category) {
