@@ -19,6 +19,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.15.2",
     "multer": "^2.0.1",
+    "node-cache": "^5.1.2",
     "nodemailer": "^7.0.3",
     "twilio": "^5.7.1"
   },
