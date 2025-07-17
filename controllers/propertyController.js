@@ -1,7 +1,5 @@
 const Property = require('../models/Property');
 const path = require('path');
-const NodeCache = require('node-cache');
-const propertyCache = new NodeCache({ stdTTL: 300 }); // cache for 5 minutes
 
 // 💡 Price formatting utility
 const formatPrice = (price) => {
@@ -121,13 +119,6 @@ const updateProperty = async (req, res) => {
 // View all properties (no filter, no pagination)
 const viewAllProperties = async (req, res) => {
     try {
-        // 🔍 Check cache first
-        const cached = propertyCache.get('allProperties');
-        if (cached) {
-            return res.status(200).json(cached);
-        }
-
-        // 📡 Fetch from DB if not in cache
         const allProperties = await Property.find().sort({ createdAt: -1 });
 
         const formatted = allProperties.map(p => ({
@@ -135,16 +126,11 @@ const viewAllProperties = async (req, res) => {
             formattedPrice: formatPrice(p.price)
         }));
 
-        // 💾 Save to cache
-        propertyCache.set('allProperties', formatted);
-
         res.status(200).json(formatted);
     } catch (err) {
-        console.error("Fetch Error:", err);
         res.status(500).json({ error: "Failed to fetch all properties" });
     }
 };
-
 
 // Get all / filter
 const getAllProperties = async (req, res) => {
