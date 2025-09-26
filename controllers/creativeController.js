@@ -1,21 +1,21 @@
 const Creative = require('../models/CreativeImage');
 
-// Add new creative image
-const addCreative = async (req, res) => {
+// Add new creative image (with image URL from Cloudinary)
+const addCreative = async (data) => {
     try {
-        const creative = new Creative(req.body);
+        const creative = new Creative(data);
         const saved = await creative.save();
-        res.status(201).json(saved);
+        return saved;
     } catch (err) {
-        res.status(500).json({ error: "Failed to add creative image" });
+        throw new Error("Failed to add creative image");
     }
 };
 
-// Get all creatives or filter by place
+// Get all creatives or filter by subtitle
 const getCreatives = async (req, res) => {
     try {
-        const { place } = req.query;
-        const filter = place ? { place: { $regex: place, $options: 'i' } } : {};
+        const { subTitle } = req.query;
+        const filter = subTitle ? { subTitle: { $regex: subTitle, $options: 'i' } } : {};
         const data = await Creative.find(filter).sort({ createdAt: -1 });
         res.status(200).json(data);
     } catch (err) {
@@ -26,7 +26,11 @@ const getCreatives = async (req, res) => {
 // Update creative image by ID
 const updateCreative = async (req, res) => {
     try {
-        const updated = await Creative.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true });
+        const updated = await Creative.findByIdAndUpdate(
+            req.params.id,
+            { $set: req.body },
+            { new: true }
+        );
         if (!updated) return res.status(404).json({ error: "Creative image not found" });
         res.status(200).json(updated);
     } catch (err) {
