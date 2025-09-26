@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 
 const {
     addProperty,
@@ -10,15 +11,25 @@ const {
     getPropertyById,
     getRecentProperties,
     deleteProperty,
-    viewAllProperties // ✅ Imported new controller
+    viewAllProperties
 } = require('../controllers/propertyController');
 
 const verifyToken = require('../middleware/authMiddleware');
 
-// ========== Multer Config ==========
+/* ================================
+   ✅ Multer Config (Shared Upload Dir)
+   ================================ */
+
+const UPLOAD_DIR = process.env.UPLOAD_DIR || path.resolve(__dirname, '..', 'uploads');
+
+// Ensure upload dir exists
+if (!fs.existsSync(UPLOAD_DIR)) {
+    fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+}
+
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'uploads/'); // Make sure this folder exists
+        cb(null, UPLOAD_DIR);
     },
     filename: (req, file, cb) => {
         const uniqueName = `${Date.now()}-${file.originalname}`;
@@ -28,6 +39,10 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+/* ================================
+   Routes
+   ================================ */
+
 // ========== Protected Routes ==========
 router.post(
     '/',
@@ -35,7 +50,7 @@ router.post(
     upload.fields([
         { name: 'slider_image', maxCount: 1 },
         { name: 'gallery', maxCount: 10 },
-        { name: 'propertyBanner', maxCount: 5 } // ✅ New
+        { name: 'propertyBanner', maxCount: 5 }
     ]),
     addProperty
 );
@@ -46,7 +61,7 @@ router.put(
     upload.fields([
         { name: 'slider_image', maxCount: 1 },
         { name: 'gallery', maxCount: 10 },
-        { name: 'propertyBanner', maxCount: 5 } // ✅ New
+        { name: 'propertyBanner', maxCount: 5 }
     ]),
     updateProperty
 );
@@ -55,7 +70,7 @@ router.delete('/:id', verifyToken, deleteProperty);
 
 // ========== Public Routes ==========
 router.get('/', getAllProperties);
-router.get('/view-all', viewAllProperties); // ✅ New route to fetch ALL properties
+router.get('/view-all', viewAllProperties);
 router.get('/recent', getRecentProperties);
 router.get('/:id', getPropertyById);
 
