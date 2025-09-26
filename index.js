@@ -15,8 +15,7 @@ const app = express();
 const allowedOrigins = [
     'http://localhost:5000',
     'http://127.0.0.1:5500',  // For local HTML testing
-    'https://sainathestate.com',
-    'http://127.0.0.1:5501'
+    'https://sainathestate.com'
 ];
 
 app.use(cors({
@@ -54,5 +53,3 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`✅ Server running at: http://localhost:${PORT}`);
 });
-
-app.use('/uploads', express.static('uploads'));

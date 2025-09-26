@@ -1,22 +1,15 @@
-const nodemailer = require('nodemailer');
+require('dotenv').config(); // Ensure this is called once in your app
+
 const twilio = require('twilio');
 const Contact = require('../models/Contact');
 
-// Twilio config
+// Twilio config from environment
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const whatsappFrom = process.env.TWILIO_WHATSAPP_FROM;
 const whatsappTo = process.env.TWILIO_WHATSAPP_TO;
-const client = twilio(accountSid, authToken);
 
-// Nodemailer config (Gmail)
-const mailTransporter = nodemailer.createTransport({
-    service: process.env.EMAIL_SERVICE, // gmail
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }
-});
+const client = twilio(accountSid, authToken);
 
 // Submit contact (public)
 const submitContact = async (req, res) => {
@@ -35,54 +28,28 @@ const submitContact = async (req, res) => {
 
         const saved = await newMessage.save();
 
-        // Construct property link if ID exists
-        const propertyUrl = propertyId
-            ? `https://sainathestate.com/property-details.html?id=${propertyId}`
-            : null;
-
-        // WhatsApp text
+        // Compose WhatsApp message
         const text = `
 📩 *New Inquiry from Website*
 *Name:* ${name}
 *Email:* ${email}
 *Phone:* ${phone}
 *Message:* ${message}
-${propertyId ? `*Property ID:* ${propertyId}` : ''}
-${propertyTitle ? `*Property Title:* ${propertyTitle}` : ''}
-${propertyUrl ? `*Link:* ${propertyUrl}` : ''}
-    `;
+        `;
 
-        // Email content
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: process.env.EMAIL_TO, // bunty + blazemedia
-            subject: `New Inquiry${propertyTitle ? `: ${propertyTitle}` : ''}`,
-            html: `
-        <h3>New Inquiry from Website</h3>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Phone:</strong> ${phone}</p>
-        <p><strong>Message:</strong> ${message}</p>
-        ${propertyId ? `<p><strong>Property ID:</strong> ${propertyId}</p>` : ""}
-        ${propertyTitle ? `<p><strong>Property Title:</strong> ${propertyTitle}</p>` : ""}
-        ${propertyUrl ? `<p><strong>Property Link:</strong> <a href="${propertyUrl}" target="_blank">${propertyUrl}</a></p>` : ""}
-      `
-        };
+        // Send WhatsApp message via Twilio
+        await client.messages.create({
+            body: text,
+            from: whatsappFrom,
+            to: whatsappTo
+        });
 
-        // Send notifications in parallel
-        await Promise.all([
-            client.messages.create({ body: text, from: whatsappFrom, to: whatsappTo }),
-            mailTransporter.sendMail(mailOptions)
-        ]);
-
-        res.status(201).json({ message: 'Submitted, WhatsApp + Email sent', data: saved });
+        res.status(201).json({ message: 'Submitted and WhatsApped successfully', data: saved });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Failed to submit or send notifications' });
+        res.status(500).json({ error: 'Failed to submit or send WhatsApp message' });
     }
 };
-
-
 
 
 // Get all (admin only) + filtering + pagination
